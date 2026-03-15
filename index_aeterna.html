@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aeternus Arde Lucus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0805;--bg3:#1a1710;
+  --gold:#c9a84c;--gold-dim:#7a6030;
+  --text:#e8dcc8;--text-dim:#8a7d66;--text-muted:#554e3e;
+  --border:rgba(201,168,76,0.2);--border-strong:rgba(201,168,76,0.5);
+  --romano:#8b2020;--castrexo:#1a4a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Crimson Text',Georgia,serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:30px 16px;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 60%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23C9A84C' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;
+}
+.wrapper{width:100%;max-width:420px;position:relative;z-index:1;}
+
+/* HEADER */
+.logo-block{text-align:center;margin-bottom:40px;}
+.logo-xxv{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:6px;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;}
+.logo-main{font-family:'Cinzel',serif;font-size:2.2rem;font-weight:900;color:var(--gold);letter-spacing:4px;line-height:1.1;text-shadow:0 0 30px rgba(201,168,76,.3);}
+.logo-sub{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:3px;color:var(--text-dim);margin-top:6px;}
+.logo-tagline{font-style:italic;font-size:1rem;color:var(--text-muted);margin-top:8px;}
+.divider{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:14px auto;}
+.ornament{text-align:center;color:var(--gold-dim);font-size:1rem;letter-spacing:8px;}
+
+/* SECTION LABEL */
+.section-lbl{font-family:'Cinzel',serif;font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-muted);margin:26px 0 10px;padding-left:2px;}
+
+/* BUTTONS */
+.app-btn{
+  display:flex;align-items:center;gap:16px;
+  width:100%;padding:20px 20px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:14px;color:var(--text);text-decoration:none;
+  transition:all .2s;margin-bottom:12px;cursor:pointer;position:relative;overflow:hidden;
+}
+.app-btn::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;}
+.app-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.6);}
+.app-btn:active{transform:scale(.98);}
+
+/* Campamento — Romano / Castrexo gradient */
+.app-btn.camp{border-color:rgba(201,168,76,.35);}
+.app-btn.camp::before{background:rgba(201,168,76,.04);}
+.app-btn.camp:hover{border-color:var(--border-strong);box-shadow:0 10px 30px rgba(201,168,76,.12);}
+.app-btn.camp:hover::before{opacity:1;}
+
+/* Maestro — rojo imperial */
+.app-btn.maestro{border-color:rgba(139,32,32,.45);}
+.app-btn.maestro::before{background:rgba(139,32,32,.06);}
+.app-btn.maestro:hover{border-color:rgba(192,57,43,.7);box-shadow:0 10px 30px rgba(139,32,32,.2);}
+.app-btn.maestro:hover::before{opacity:1;}
+
+/* Icon */
+.btn-ico{
+  width:50px;height:50px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+}
+.camp .btn-ico{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.2);}
+.maestro .btn-ico{background:rgba(139,32,32,.15);border:1px solid rgba(139,32,32,.3);}
+
+/* Text */
+.btn-text{flex:1;text-align:left;}
+.btn-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;letter-spacing:1.5px;line-height:1.2;}
+.camp .btn-name{color:var(--gold);}
+.maestro .btn-name{color:#e07070;}
+.btn-desc{font-size:0.85rem;color:var(--text-dim);margin-top:3px;font-style:italic;}
+
+/* Rama badges */
+.btn-ramas{display:flex;gap:6px;margin-top:8px;}
+.rama-badge{font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:2px;padding:3px 8px;border-radius:4px;font-weight:700;}
+.rama-badge.r{background:rgba(139,32,32,.3);color:#e07070;border:1px solid rgba(139,32,32,.4);}
+.rama-badge.c{background:rgba(26,74,42,.3);color:#70c090;border:1px solid rgba(26,74,42,.4);}
+
+/* Arrow */
+.btn-arrow{font-size:20px;color:var(--gold-dim);transition:all .2s;flex-shrink:0;}
+.app-btn:hover .btn-arrow{color:var(--gold);transform:translateX(4px);}
+
+/* Footer */
+.footer{text-align:center;margin-top:36px;font-family:'Cinzel',serif;font-size:0.55rem;letter-spacing:3px;color:var(--text-muted);opacity:.5;text-transform:uppercase;}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <div class="logo-block">
+    <div class="logo-xxv">XXV Aniversario · 2026</div>
+    <div class="logo-main">AETERNUS</div>
+    <div class="logo-sub">Arde Lucus</div>
+    <div class="divider"></div>
+    <div class="ornament">⚔ &nbsp; ✦ &nbsp; ⚔</div>
+    <div class="logo-tagline">Una ciudad, un destino</div>
+  </div>
+
+  <div class="section-lbl">⚔ Campamentos</div>
+
+  <a href="aeterna-campamento.html" class="app-btn camp">
+    <div class="btn-ico">🏕️</div>
+    <div class="btn-text">
+      <div class="btn-name">App Campamento</div>
+      <div class="btn-desc">Arena, pruebas y chat en tiempo real</div>
+      <div class="btn-ramas">
+        <span class="rama-badge r">🦅 Romana</span>
+        <span class="rama-badge c">🌿 Castrexa</span>
+      </div>
+    </div>
+    <div class="btn-arrow">›</div>
+  </a>
+
+  <div class="section-lbl">🛡️ Maestro</div>
+
+  <a href="aeternamaestro.html" class="app-btn maestro">
+    <div class="btn-ico">👁️</div>
+    <div class="btn-text">
+      <div class="btn-name">Panel Maestro</div>
+      <div class="btn-desc">Control total del juego y grupos</div>
+    </div>
+    <div class="btn-arrow">›</div>
+  </a>
+
+  <div class="footer">Arde Lucus · Lugo · MMXXVI</div>
+</div>
+</body>
+</html>
