@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscripción AETERNUS ARDE LUCUS - Tarde</title>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDmpGzOSToV8mFRkxSxLKL6Isoi_7lEU2E",
+            authDomain: "escape-room-arde-lucus.firebaseapp.com",
+            projectId: "escape-room-arde-lucus",
+            storageBucket: "escape-room-arde-lucus.firebasestorage.app",
+            messagingSenderId: "264728827438",
+            appId: "1:264728827438:web:a764eebccf4dcfc73771bf",
+            measurementId: "G-YS737T6K14"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const reservasRef = collection(db, "reservas");
+
+        // Horarios de tarde — índice compartido con las mañanas para mantener la alternancia global
+        // Las mañanas ocupan índices 0–12 (13 slots). Las tardes empiezan en índice 13.
+        // 10:00(0) 10:15(1) … 13:00(12) | 16:30(13) 16:45(14) … 18:30(21)
+        const HORARIOS_TARDE = ["16:30","16:45","17:00","17:15","17:30","17:45","18:00","18:15","18:30"];
+        const OFFSET_TARDE = 13; // cuántos slots de mañana hay antes
+
+        const getRama = (indexGlobal) => indexGlobal % 2 === 0 ? 'Romana' : 'Castrexa';
+
+        let ocupados = [];
+        onSnapshot(reservasRef, (snap) => {
+            ocupados = [];
+            snap.forEach(doc => ocupados.push(doc.data()));
+            actualizarHoras();
+        });
+
+        window.actualizarHoras = () => {
+            const t = document.getElementById('t');
+            const d = document.getElementById('d').value;
+            t.innerHTML = '<option value="">-- Selecciona Hora --</option>';
+            if (!d) { t.disabled = true; actualizarRamaDisplay(''); return; }
+
+            HORARIOS_TARDE.forEach((hora, i) => {
+                const indexGlobal = OFFSET_TARDE + i;
+                const rama = getRama(indexGlobal);
+                const isOcupado = ocupados.some(r => r.date === d && r.time === hora);
+                const opt = document.createElement('option');
+                opt.value = hora;
+                opt.dataset.rama = rama;
+                const icono = rama === 'Romana' ? '🦅' : '🌿';
+                opt.textContent = isOcupado
+                    ? `${hora} — ${icono} ${rama} (OCUPADO)`
+                    : `${hora} h — ${icono} ${rama}`;
+                if (isOcupado) opt.disabled = true;
+                t.appendChild(opt);
+            });
+
+            t.disabled = false;
+            actualizarRamaDisplay('');
+        };
+
+        window.onHoraChange = () => {
+            const t = document.getElementById('t');
+            const selected = t.options[t.selectedIndex];
+            const rama = selected?.dataset?.rama || '';
+            actualizarRamaDisplay(rama);
+        };
+
+        window.actualizarRamaDisplay = (rama) => {
+            const box = document.getElementById('ramaBox');
+            const txt = document.getElementById('ramaText');
+            document.getElementById('r').value = rama;
+            if (!rama) {
+                box.className = 'rama-box';
+                txt.textContent = 'Se asignará al elegir hora';
+                return;
+            }
+            const icono = rama === 'Romana' ? '🦅' : '🌿';
+            box.className = `rama-box ${rama === 'Romana' ? 'romana' : 'castrexa'}`;
+            txt.textContent = `${icono} ${rama}`;
+        };
+
+        window.reservar = async (e) => {
+            e.preventDefault();
+            const rama = document.getElementById('r').value;
+            if (!rama) {
+                alert("Por favor selecciona una hora primero.");
+                return;
+            }
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerText = "SELLANDO...";
+
+            const data = {
+                name:  document.getElementById('n').value,
+                email: document.getElementById('e').value,
+                phone: document.getElementById('p').value,
+                date:  document.getElementById('d').value,
+                time:  document.getElementById('t').value,
+                size:  document.getElementById('s').value,
+                rama,
+                createdAt: new Date()
+            };
+
+            try {
+                await addDoc(reservasRef, data);
+                const icono = rama === 'Romana' ? '🦅' : '🌿';
+                document.getElementById('formInscripcion').innerHTML = `
+                    <div style="text-align:center; padding:40px; border: 2px solid #D4AF37; background: rgba(0,0,0,0.85); border-radius:15px; box-shadow: 0 0 20px #D4AF37;">
+                        <h1 style="color:#D4AF37; font-size: 2rem; margin-bottom:15px;">¡RES GESTA EST!</h1>
+                        <p style="color:white; font-size: 1.3rem; line-height:1.4;">Nos vemos en el escape room del Arde Lucus</p>
+                        <p style="color:#aaa; margin-top:15px; font-style:italic;">Día: ${data.date.split('-')[2]}/06 | Hora: ${data.time}h | Rama: ${icono} ${data.rama}</p>
+                    </div>`;
+            } catch (err) {
+                alert("Error de conexión. Inténtalo de nuevo.");
+                btn.disabled = false;
+                btn.innerText = "SELLAR RESERVA";
+            }
+        };
+    </script>
+
+    <style>
+        :root { --gold: #D4AF37; --red: #8B0000; }
+        body { 
+            margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            font-family: 'Times New Roman', serif; background-color: #000;
+            background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('https://i.postimg.cc/NFw4qSWr/unnamed.jpg'); 
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        .card { 
+            background: rgba(15,15,15,0.95); border: 2px solid var(--gold); padding: 35px; border-radius: 15px; 
+            max-width: 420px; width: 100%; color: white; box-shadow: 0 0 40px rgba(0,0,0,0.8); backdrop-filter: blur(5px);
+        }
+        .header-box { text-align: center; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 15px; margin-bottom: 15px; }
+        h1 { color: var(--gold); text-transform: uppercase; font-size: 1.5rem; margin: 0; letter-spacing: 1px; }
+        .tagline { color: #ccc; font-size: 0.9rem; font-style: italic; display: block; margin-top: 5px; }
+        label { display: block; color: var(--gold); margin: 12px 0 5px; font-weight: bold; text-transform: uppercase; font-size: 0.8rem; }
+        input, select { 
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.7); border: 1px solid #444; 
+            color: white; border-radius: 6px; box-sizing: border-box; font-size: 1rem; 
+        }
+        button { 
+            width: 100%; padding: 16px; margin-top: 25px; background: linear-gradient(to bottom, #a00, var(--red)); 
+            color: white; border: 1px solid var(--gold); font-weight: bold; cursor: pointer; 
+            text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; border-radius: 6px;
+        }
+        button:hover { background: var(--red); box-shadow: 0 0 15px var(--gold); }
+
+        .rama-box {
+            width: 100%; padding: 14px 12px; border-radius: 8px; text-align: center;
+            font-size: 1.05rem; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+            border: 2px solid #444; background: rgba(0,0,0,0.5); color: #666;
+            transition: all 0.3s; box-sizing: border-box;
+        }
+        .rama-box.romana {
+            border-color: #c0392b;
+            background: rgba(139,0,0,0.25);
+            color: #ffaaaa;
+            box-shadow: 0 0 10px rgba(139,0,0,0.4);
+        }
+        .rama-box.castrexa {
+            border-color: #2d8a2d;
+            background: rgba(34,100,34,0.25);
+            color: #aaffaa;
+            box-shadow: 0 0 10px rgba(34,100,34,0.4);
+        }
+        .rama-nota {
+            font-size: 0.72rem; color: #666; text-align: center; margin-top: 5px;
+            font-style: italic; letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card" id="formInscripcion">
+        <div class="header-box">
+            <h1>Aeternus Arde Lucus: XXV años, una ciudad, un destino</h1>
+            <span class="tagline">(escape room — turno de tarde)</span>
+        </div>
+        
+        <form onsubmit="window.reservar(event)">
+            <label>Nombre de la Legión / Grupo:</label>
+            <input type="text" id="n" placeholder="Ej: Centuria Lucensis" required>
+
+            <label>Correo Electrónico:</label>
+            <input type="email" id="e" placeholder="roma@email.com" required>
+
+            <label>Teléfono:</label>
+            <input type="tel" id="p" placeholder="600 000 000" required>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;">
+                    <label>Día (Junio):</label>
+                    <select id="d" onchange="window.actualizarHoras()" required>
+                        <option value="">-- Elige --</option>
+                        <option value="2026-06-15">Lunes 15</option>
+                        <option value="2026-06-16">Martes 16</option>
+                        <option value="2026-06-17">Miércoles 17</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label>Valientes (Máx 6):</label>
+                    <input type="number" id="s" value="4" min="1" max="6">
+                </div>
+            </div>
+
+            <label>Hora disponible (Tarde):</label>
+            <select id="t" disabled required onchange="window.onHoraChange()">
+                <option value="">-- Selecciona Hora --</option>
+            </select>
+
+            <label style="margin-top:16px;">Rama asignada:</label>
+            <div class="rama-box" id="ramaBox">
+                <span id="ramaText">Se asignará al elegir hora</span>
+            </div>
+            <p class="rama-nota">La rama se asigna automáticamente según el horario elegido</p>
+            <input type="hidden" id="r" value="">
+
+            <button type="submit" id="btnSubmit">SELLAR RESERVA</button>
+        </form>
+    </div>
+</body>
+</html>
