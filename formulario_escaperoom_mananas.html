@@ -90,6 +90,18 @@
             txt.textContent = `${icono} ${rama}`;
         };
 
+        window.actualizarMiembros = () => {
+            const size = parseInt(document.getElementById('s').value) || 1;
+            const container = document.getElementById('membersContainer');
+            container.innerHTML = '';
+            for (let i = 1; i <= size; i++) {
+                const div = document.createElement('div');
+                div.style.marginBottom = '6px';
+                div.innerHTML = `<input type="text" id="m${i}" placeholder="Integrante ${i}" style="width:100%;padding:10px;background:rgba(0,0,0,0.7);border:1px solid #444;color:white;border-radius:6px;box-sizing:border-box;font-size:0.95rem;">`;
+                container.appendChild(div);
+            }
+        };
+
         window.reservar = async (e) => {
             e.preventDefault();
             const rama = document.getElementById('r').value;
@@ -101,6 +113,13 @@
             btn.disabled = true;
             btn.innerText = "SELLANDO...";
 
+            const size = parseInt(document.getElementById('s').value) || 1;
+            const members = [];
+            for (let i = 1; i <= size; i++) {
+                const val = document.getElementById(`m${i}`)?.value?.trim();
+                if (val) members.push(val);
+            }
+
             const data = {
                 name:  document.getElementById('n').value,
                 email: document.getElementById('e').value,
@@ -108,6 +127,7 @@
                 date:  document.getElementById('d').value,
                 time:  document.getElementById('t').value,
                 size:  document.getElementById('s').value,
+                members,
                 rama,
                 createdAt: new Date()
             };
@@ -210,8 +230,16 @@
                 </div>
                 <div style="flex:1;">
                     <label>Valientes (Máx 6):</label>
-                    <input type="number" id="s" value="4" min="1" max="6">
+                    <input type="number" id="s" value="4" min="1" max="6" onchange="window.actualizarMiembros()">
                 </div>
+            </div>
+
+            <label style="margin-top:14px;">Nombres de los integrantes:</label>
+            <div id="membersContainer">
+                <div style="margin-bottom:6px;"><input type="text" id="m1" placeholder="Integrante 1" style="width:100%;padding:10px;background:rgba(0,0,0,0.7);border:1px solid #444;color:white;border-radius:6px;box-sizing:border-box;font-size:0.95rem;"></div>
+                <div style="margin-bottom:6px;"><input type="text" id="m2" placeholder="Integrante 2" style="width:100%;padding:10px;background:rgba(0,0,0,0.7);border:1px solid #444;color:white;border-radius:6px;box-sizing:border-box;font-size:0.95rem;"></div>
+                <div style="margin-bottom:6px;"><input type="text" id="m3" placeholder="Integrante 3" style="width:100%;padding:10px;background:rgba(0,0,0,0.7);border:1px solid #444;color:white;border-radius:6px;box-sizing:border-box;font-size:0.95rem;"></div>
+                <div style="margin-bottom:6px;"><input type="text" id="m4" placeholder="Integrante 4" style="width:100%;padding:10px;background:rgba(0,0,0,0.7);border:1px solid #444;color:white;border-radius:6px;box-sizing:border-box;font-size:0.95rem;"></div>
             </div>
 
             <label>Hora disponible (Mañana):</label>
